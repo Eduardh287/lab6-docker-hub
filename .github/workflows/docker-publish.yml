@@ -23,6 +23,15 @@ jobs:
     needs: build-and-test
     steps:
       - uses: actions/checkout@v3
+      - name: Check token format
+        env:
+          T: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          echo "length=${#T}"
+          case "$T" in dckr_pat_*) echo "prefix ok";; *) echo "prefix WRONG";; esac
+          if printf '%s' "$T" | grep -q '[[:space:]]'; then echo "has whitespace"; else echo "no whitespace"; fi
+          if printf '%s' "$T" | LC_ALL=C grep -q '[^ -~]'; then echo "has non-ASCII"; else echo "ascii only"; fi
+          echo "lines=$(printf '%s' "$T" | wc -l)"
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
